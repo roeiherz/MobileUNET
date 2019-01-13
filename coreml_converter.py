@@ -1,0 +1,53 @@
+import re
+
+import onnx
+import torch
+from onnx import onnx_pb
+from onnx_coreml import convert
+from onnx_tf.backend import prepare
+
+from nets.ImgWrapNet import ImgWrapNet
+
+# %%
+from nets.MobileNetV2_unet import MobileNetV2_unet
+
+IMG_SIZE = 224
+
+TMP_ONNX = 'tmp/tmp.onnx'
+WEIGHT_PATH = 'outputs/UNET_224_weights_100000_days/0-best.pth'
+ML_MODEL = re.sub('\.pth$', '.mlmodel', WEIGHT_PATH)
+TF_MODEL = re.sub('\.pth$', '.pb', WEIGHT_PATH)
+
+# %%
+# Convert to ONNX once
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
+model = MobileNetV2_unet()
+model.load_state_dict(torch.load('{}/{}-best.pth'.format(OUT_DIR, n), map_location="cpu"))
+# model = ImgWrapNet(torch.load(WEIGHT_PATH, map_location='cpu'))
+model.to(device)
+model.eval()
+
+torch.onnx.export(model,
+                  torch.randn(1, 3, IMG_SIZE, IMG_SIZE),
+                  TMP_ONNX)
+
+# %%
+# Print out ONNX model to confirm the number of output layer
+onnx_model = onnx.load(TMP_ONNX)
+print(onnx_model)
+
+# %%
+# Convert ONNX to CoreML model
+model_file = open(TMP_ONNX, 'rb')
+model_proto = onnx_pb.ModelProto()
+model_proto.ParseFromString(model_file.read())
+# 595 is the identifier of output.
+coreml_model = convert(model_proto,
+                       image_input_names=['0'],
+                       image_output_names=['595'])
+coreml_model.save(ML_MODEL)
+
+# %%
+# tf_rep = prepare(onnx_model)  # prepare tf representation
+# tf_rep.export_graph(TF_MODEL)  # export the model
