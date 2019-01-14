@@ -98,9 +98,9 @@ class MobileNetV2_unet(nn.Module):
         x = self.conv_score(x)
         logging.debug((x.shape, 'conv_score'))
 
-        # if self.mode == "eval":
-        # x = interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
-        # logging.debug((x.shape, 'interpolate'))
+        if self.mode == "eval":
+            x = interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
+            logging.debug((x.shape, 'interpolate'))
 
         x = torch.sigmoid(x)
         # x = torch.nn.Softmax(x)

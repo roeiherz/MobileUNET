@@ -159,11 +159,11 @@ if __name__ == '__main__':
         create_folder(output_path)
 
     # Process the network
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = "cpu"
     # data_loader = get_data_loaders(frames)
-    model = MobileNetV2_unet()
-    model.load_state_dict(torch.load(model_path, map_location="cpu"))
+    model = MobileNetV2_unet(mode="eval")
+    model.load_state_dict(torch.load(model_path))
     model.to(device)
     model.eval()
     transform = Compose([Resize((IMG_SIZE, IMG_SIZE)), ToTensor()])

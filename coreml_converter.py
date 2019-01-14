@@ -23,7 +23,7 @@ TF_MODEL = re.sub('\.pth$', '.pb', WEIGHT_PATH)
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = torch.device("cpu")
 model = MobileNetV2_unet()
-model.load_state_dict(torch.load('{}/{}-best.pth'.format(OUT_DIR, n), map_location="cpu"))
+model.load_state_dict(torch.load(WEIGHT_PATH, map_location='cpu'))
 # model = ImgWrapNet(torch.load(WEIGHT_PATH, map_location='cpu'))
 model.to(device)
 model.eval()
@@ -45,7 +45,7 @@ model_proto.ParseFromString(model_file.read())
 # 595 is the identifier of output.
 coreml_model = convert(model_proto,
                        image_input_names=['0'],
-                       image_output_names=['595'])
+                       image_output_names=['590'])
 coreml_model.save(ML_MODEL)
 
 # %%
