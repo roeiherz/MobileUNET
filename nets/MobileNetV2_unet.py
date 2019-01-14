@@ -10,7 +10,7 @@ from nets.MobileNetV2 import MobileNetV2, InvertedResidual
 
 
 class MobileNetV2_unet(nn.Module):
-    def __init__(self, pre_trained='weights/mobilenet_v2.pth.tar', mode='train'):
+    def __init__(self, pre_trained='weights/mobilenet_v2.pth.tar', mode='train', num_classes=1):
         super(MobileNetV2_unet, self).__init__()
 
         self.mode = mode
@@ -30,7 +30,7 @@ class MobileNetV2_unet(nn.Module):
 
         self.conv_last = nn.Conv2d(16, 3, 1)
 
-        self.conv_score = nn.Conv2d(3, 1, 1)
+        self.conv_score = nn.Conv2d(3, num_classes, 1)
 
         self._init_weights()
 
@@ -98,12 +98,12 @@ class MobileNetV2_unet(nn.Module):
         x = self.conv_score(x)
         logging.debug((x.shape, 'conv_score'))
 
-        # if self.mode == "eval":
-        # x = interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
-        # logging.debug((x.shape, 'interpolate'))
+        if self.mode == "eval":
+            x = interpolate(x, scale_factor=2, mode='bilinear', align_corners=False)
+            logging.debug((x.shape, 'interpolate'))
 
-        x = torch.sigmoid(x)
-        # x = torch.nn.Softmax(x)
+        # x = torch.sigmoid(x)
+        x = torch.nn.Softmax(x)
 
         return x
 

@@ -116,7 +116,7 @@ def run_cv(img_size, pre_trained):
         data_loaders = get_data_loaders(train_files, val_files, img_size)
         trainer = Trainer(data_loaders, criterion, device, on_after_epoch)
 
-        model = MobileNetV2_unet(pre_trained=pre_trained)
+        model = MobileNetV2_unet(pre_trained=pre_trained, num_classes=3)
         model.to(device)
         optimizer = Adam(model.parameters(), lr=LR)
 

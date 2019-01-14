@@ -1,7 +1,7 @@
 import random
 import re
 from glob import glob
-
+import torch
 import cv2
 import numpy as np
 from PIL import Image
@@ -29,7 +29,7 @@ def get_img_files_eval():
 
 def get_img_files():
     mask_files = sorted(glob('{}/masks/*.jpg'.format(IMG_DIR)))
-    # mask_files = mask_files[:10000]
+    mask_files = mask_files[:1000]
     sorted_mask_files = []
 
     # Sorting out
@@ -64,26 +64,33 @@ class MaskDataset(Dataset):
         self.mask_axis = mask_axis
 
     def __getitem__(self, idx):
-        img = cv2.imread(self.img_files[idx])
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        mask = cv2.imread(self.mask_files[idx])
-        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-        mask = mask[:, :, self.mask_axis]
 
         seed = random.randint(0, 2 ** 32)
+
+        img = cv2.imread(self.img_files[idx])
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Apply transform to img
         random.seed(seed)
         img = Image.fromarray(img)
         img = self.transform(img)
 
-        # Apply same transform to mask
-        random.seed(seed)
-        mask = Image.fromarray(mask)
-        mask = self.mask_transform(mask)
+        self.mask_files[idx] = '/home/roei/Datasets/weather_halo/masks/overcast_016ad89b-219b-42cf-ba46-f258437629b8_frame1.jpg'
+        masks_path = re.sub('^{}/masks'.format(IMG_DIR), '{}/masks_per_object'.format(IMG_DIR), self.mask_files[idx])
+        masks_path_lst = glob("{}_*".format(masks_path.split('.')[0]))
 
-        return img, mask
+        masks = []
+        for mask_path in masks_path_lst:
+            mask = cv2.imread(mask_path)
+            m = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
+            m = m[:, :, self.mask_axis]
+            m = Image.fromarray(m)
+            m = self.mask_transform(m)
+            # m = torch.unsqueeze(m, dim=0)
+            masks.append(m)
+
+        masks = torch.cat(masks)
+        return img, masks
 
     def __len__(self):
         return len(self.img_files)
