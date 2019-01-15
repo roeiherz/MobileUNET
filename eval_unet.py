@@ -59,7 +59,9 @@ def evaluate():
     device = torch.device("cpu")
 
     for n, (train_idx, val_idx) in enumerate(kf.split(image_files)):
-        val_files = image_files[val_idx]
+        # val_files = image_files[val_idx]
+        # todo: delete it - only for Ilan's debug
+        val_files = ["image/path.jpg"]
         data_loader = get_data_loaders(val_files)
 
         model = MobileNetV2_unet(mode="eval")
