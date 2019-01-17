@@ -49,21 +49,22 @@ def evaluate():
     img_size = (IMG_SIZE, IMG_SIZE)
     n_shown = 0
 
-    # image_files = get_img_files()
-    image_files = get_img_files_eval()
-    kf = KFold(n_splits=N_CV, random_state=RANDOM_STATE, shuffle=True)
+    image_files = ["imgs/path"]
+    # image_files = get_img_files_eval()
+    # kf = KFold(n_splits=N_CV, random_state=RANDOM_STATE, shuffle=True)
 
-    # os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cpu")
 
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device("cpu")
-
-    for n, (train_idx, val_idx) in enumerate(kf.split(image_files)):
-        val_files = image_files[val_idx]
+    # for n, (train_idx, val_idx) in enumerate(kf.split(image_files)):
+    for n, img_path in enumerate(image_files):
+        # val_files = image_files[val_idx]
+        val_files = image_files[n]
         data_loader = get_data_loaders(val_files)
 
         model = MobileNetV2_unet(mode="eval")
-        model.load_state_dict(torch.load('{}/{}-best.pth'.format(OUT_DIR, n), map_location="cpu"))
+        # model.load_state_dict(torch.load('{}/{}-best.pth'.format(OUT_DIR, n), map_location="cpu"))
+        model.load_state_dict(torch.load('{}/{}-best.pth'.format(OUT_DIR, n)))
         model.to(device)
         model.eval()
 
