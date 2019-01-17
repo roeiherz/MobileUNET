@@ -7,16 +7,17 @@ __author__ = 'roeiherz'
 # WEIGHT_PATH = 'outputs/UNET_224_weights_100000_days/0-best.pth'
 model = coremltools.models.MLModel('outputs/UNET_224_weights_100000_days/0-best.mlmodel')
 img = np.load('img.p')
-print(np.average(img[0, :, :]))
-print(np.average(img[1, :, :]))
-print(np.average(img[2, :, :]))
 img = img.transpose(1, 2, 0)
 img = Image.fromarray(img, 'RGB')
+# print(np.average(img[0, :, :]))
+# print(np.average(img[1, :, :]))
+# print(np.average(img[2, :, :]))
 
 predictions = model.predict({'0': img})
 # print(np.max(predictions['592'][0]))
-
-mask_img = Image.fromarray(np.uint8(predictions['592'][0] * 255), 'L')
+# mask_img = Image.fromarray(np.uint8(predictions['590'][0] * 255), 'L')
+mask_img = np.array(predictions['590']) * 255
+mask_img = Image.fromarray(mask_img)
 mask_img.show()
 
 # img = Image.open('011934.jpg')
